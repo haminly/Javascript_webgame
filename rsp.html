@@ -1,0 +1,114 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>가위바위보</title>
+  <style>
+    #computer {
+      width: 142px;
+      height: 200px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="computer"></div>
+  <div>
+    <button id="scissors" class="btn">가위</button>
+    <button id="rock" class="btn">바위</button>
+    <button id="paper" class="btn">보</button>
+  </div>
+  <div id="score">0 : 0</div>
+  <script>
+    const $computer = document.querySelector('#computer');
+    const $score = document.querySelector('#score');
+    const $rock = document.querySelector('#rock');
+    const $scissors = document.querySelector('#scissors');
+    const $paper = document.querySelector('#paper');
+    const IMG_URL = './rsp.png';
+    $computer.style.background = `url(${IMG_URL}) 0 0`; // 0 , -220 -440 px 
+    $computer.style.backgroundSize = 'auto 200px';
+    const rspX = {
+      scissors: '0',
+      rock: '-220px',
+      paper: '-440px',
+    }
+    let computerChoice = 'scissors';
+    const changeComputerHand = () => {
+      if (computerChoice === 'scissors') //가위이면 바위로
+      {
+        computerChoice = 'rock';
+      }
+      else if (computerChoice === 'rock') //바위이면 보로
+      {
+        computerChoice = 'paper';
+      }
+      else if (computerChoice === 'paper')//보면 가위로
+      {
+        computerChoice = 'scissors';
+      }
+      //rsp.computerChocie 안됨!!
+      $computer.style.background = `url(${IMG_URL}) ${rspX[computerChoice]} 0`; // 0 , -220 -440 px 
+      $computer.style.backgroundSize = 'auto 200px';
+    }
+    let clickable = true; //flag 설정 
+    const scoreBoard = { //가위 바위 보 -1 0 1 
+      scissors : -1,
+      rock : 0,
+      paper : 1,
+    };
+    let message;
+    let myPoint = 0;
+    let computerPoint = 0;
+    intervalId = setInterval(changeComputerHand, 50); //setInterval를 멈추기 위해 변수에 할당
+    const clickButton = (event) => {
+      if (clickable === true)
+      {
+        clearInterval(intervalId); //정지
+        clickable = false;
+        const myChoice = event.target.id; //내가 뭘 냈는지
+        const myScore = scoreBoard[myChoice]; 
+        const computerScore = scoreBoard[computerChoice];
+        const diff = myScore - computerScore;
+        // or ( || ) 는 배열 includes로 간단하게 바꿔줄수 있다.
+        // diff === '사자' || diff === '고양이' || diff === '강아지'  =>  ['사자', '고양이', '강아지'].includes(diff)
+        if ([-2, 1].includes(diff)) //가위 바위 보 경우의수 9개 다 if절로 하면 너무 코드가 길어져서 가위 바위 보에 숫자를 할당하여 규칙을 찾음
+        {
+          myPoint += 1;
+          message = '사용자 WIN'
+        }
+        else if ([-1, 2].includes(diff))
+        {
+          computerPoint += 1;
+          message = '컴퓨터 WIN'
+        }
+        else if (diff == 0)
+        {
+          message = '무승부'
+        }
+        console.log(myChoice);
+        $score.textContent = `${myPoint} : ${computerPoint} / ${message}`
+        if (myPoint === 3)
+        {
+          $score.textContent = `GAME SET, USER WIN`
+        }
+        else if (computerPoint === 3)
+        {
+          $score.textContent = `GAME SET, COMPUTER WIN`
+        }
+        else
+        {setTimeout(() => { //1초후
+          clickable = true;
+          intervalId = setInterval(changeComputerHand, 50); //다시 반복
+        }, 1000);
+        }
+      }
+    };
+    $rock.addEventListener('click', clickButton);
+    $scissors.addEventListener('click', clickButton);
+    $paper.addEventListener('click', clickButton);
+
+  </script>
+</body>
+
+</html>
