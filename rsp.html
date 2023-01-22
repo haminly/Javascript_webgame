@@ -88,11 +88,11 @@
         }
         console.log(myChoice);
         $score.textContent = `${myPoint} : ${computerPoint} / ${message}`
-        if (myPoint === 3)
+        if (myPoint >= 3)
         {
           $score.textContent = `GAME SET, USER WIN`
         }
-        else if (computerPoint === 3)
+        else if (computerPoint >= 3)
         {
           $score.textContent = `GAME SET, COMPUTER WIN`
         }
