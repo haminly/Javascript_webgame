@@ -129,7 +129,12 @@
         });
       });
       const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      console.log(0.25 * data.flat().filter((val) => val >= 512).length);
+      if (data.flat().includes(512) && Math.random() >= 0.25 * data.flat().filter((val) => val >= 512).length ) {
+        data[randomCell[0]][randomCell[1]] = 4;
+      } else {
       data[randomCell[0]][randomCell[1]] = 2;
+      }
     }
 
     function draw() {
@@ -149,13 +154,13 @@
 
     startGame();
 
-    //    data = [
-    //      [1024, 2, 4, 2],
-    //      [1024, 256, 8, 256],
-    //      [2, 512, 4, 8],
-    //      [512, 16, 512, 4],
-    //    ];
-    //    draw();
+  //      data = [
+  //        [1024, 2, 4, 0],
+  //        [512, 0, 0, 0],
+  //        [2, 0, 0, 0],
+  //        [0, 0, 0, 0],
+  //      ];
+  //      draw();
 
     function moveCells(direction) {
       history.push({
