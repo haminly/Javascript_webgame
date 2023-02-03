@@ -1,0 +1,90 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>숫자야구</title>
+</head>
+
+<body>
+  <form id="form">
+    <input type="text" id="input">
+    <button>확인</button>
+  </form>
+  <div id="logs"></div>
+  <script>
+    const $input = document.querySelector('#input');
+    const $form = document.querySelector('#form');
+    const $logs = document.querySelector('#logs');
+    const $button = document.querySelector('button');
+
+    let out = 0;
+    const tries = [];
+    const num_pick = [];
+    const numbers = [];
+    for (let i = 1; i < 10; i++) {
+      numbers.push(i);
+    }
+    for (let i = 0; i < 4; i++) {
+      const randomIdx = Math.floor(Math.random() * numbers.length);
+      num_pick.push(numbers[randomIdx]);
+      numbers.splice(randomIdx, 1);
+    }
+    console.log(num_pick);
+    $button.addEventListener('click', onClickButton);
+
+    function onClickButton(event) {
+      event.preventDefault();
+      const value = $input.value;
+      $input.value = '';
+      if (!checkValue(value)){
+        return;
+      }
+      tries.push(value);
+      if (value === num_pick.join('')) {
+        $logs.append('홈런! 정답입니다!');
+        return;
+      }
+      let strike = 0;
+      let ball = 0;
+      num_pick.forEach((val,index) => {
+        if (value.indexOf(val) > -1) {
+          if (index === value.indexOf(val)) {
+            strike += 1;
+          } else {
+            ball += 1;
+          }
+        }
+      });
+      if (ball || strike) {
+      $logs.append(`${value}, ${strike} 스트라이크 ${ball} 볼 !`, document.createElement('br'));
+      } else {
+        out += 1;
+        $logs.append(`${out} 아웃!!!`, document.createElement('br'));
+      }
+      if (tries.length >= 10 || out >= 3) {
+        $logs.append('아웃..! 체인지!!!', document.createElement('br'));
+        $logs.append(`정답은 ${num_pick}입니다`, document.createElement('br'));
+        return;
+      }
+    }
+    function checkValue(value){
+      if (value.length !== 4) {
+        $input.value = '';
+        $input.focus();
+        alert('네글자를 입력하시오');
+      } else if(new Set(value).size !== 4){
+        $input.value = '';
+        $input.focus();
+        alert('중복되면 안됩니다');
+      } else if (tries.includes(value)) {
+        $input.value = '';
+        $input.focus();
+        alert('시도한 숫자입니다');
+      } else {
+        return true;
+      }
+    }
+  </script>
+</body>
+
+</html>

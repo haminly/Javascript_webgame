@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>틱택토</title>
+	<style>
+		table {
+			border-collapse: collapse;
+		}
+
+		td {
+			border: 1px solid black;
+			width: 40px;
+			height: 40px;
+			text-align: center;
+		}
+	</style>
+</head>
+
+<body>
+	<script>
+    const { body } = document;
+    const $table = document.createElement('table');
+    const $result = document.createElement('div');
+    const rows = [];
+    let turn = 'O';
+
+    const $fragment = document.createDocumentFragment();
+    for (let i = 0; i < 3; i++) {
+      const $tr = document.createElement('tr');
+      const row = [];
+      for (let i = 0; i< 3; i++) {
+        const $td = document.createElement('td');
+        row.push($td);
+        $tr.append($td);
+      }
+      rows.push(row);
+      $fragment.append($tr);
+    }
+    $table.append($fragment);
+    body.append($table);
+    body.append($result);
+
+    $table.addEventListener('click', onClick);
+    function onClick(event) {
+      const { target } = event;
+      if (!target.textContent) {
+        target.textContent = turn;
+        winAndDraw(target);
+      }
+    }
+    function winAndDraw(target) {
+      if (hasWinner(target)){ //승자가 있으면
+        $table.removeEventListener('click', onClick);
+        setTimeout(() => {
+          alert(`${turn} 승리!`);
+        }, 100)
+      } else if(rows.flat().filter((cell, i) => {return (cell.textContent === '')}).length === 0) {//무승부면
+        $table.removeEventListener('click', onClick);
+        setTimeout(() => {
+          alert('무승부');
+        }, 100)
+      } else {
+        changeTurn();
+      }
+    }
+    function hasWinner(target) {
+      const cellIndex = target.cellIndex;
+      const rowIndex = target.parentNode.rowIndex;
+      
+      let winnerFlag = false;
+      if (rows[rowIndex][0].textContent === turn && rows[rowIndex][1].textContent === turn && rows[rowIndex][2].textContent === turn){
+        winnerFlag = true;
+      } else if (rows[0][cellIndex].textContent === turn && rows[1][cellIndex].textContent === turn && rows[2][cellIndex].textContent === turn){
+        winnerFlag = true;
+      } else if (rows[0][0].textContent === turn && rows[1][1].textContent === turn && rows[2][2].textContent === turn){
+        winnerFlag = true;
+      } else if (rows[2][0].textContent === turn && rows[1][1].textContent === turn && rows[0][2].textContent === turn){
+        winnerFlag = true;
+      }
+      return (winnerFlag);
+    }
+
+    function changeTurn() {
+      turn = (turn === 'O' ? 'X' : 'O');
+    }
+
+	</script> 
+</body>
+
+</html>

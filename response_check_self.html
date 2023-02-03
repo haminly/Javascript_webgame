@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>반응속도</title>
+	<style>
+		#screen {
+			width: 300px;
+			height: 200px;
+			text-align: center;
+			user-select: none;
+		}
+
+		#screen.waiting {
+			background-color: aqua;
+		}
+
+		#screen.ready {
+			background-color: red;
+			color: white;
+		}
+
+		#screen.now {
+			background-color: greenyellow;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="screen" class="waiting">클릭해서 시작하세요</div>
+	<div id="result"></div>
+	<script>
+		const $screen = document.querySelector('#screen');
+		const $result = document.querySelector('#result');
+    let startTime;
+    let endTime;
+    const records = [];
+		$screen.addEventListener('click', clickScreen);
+
+		function clickScreen(event) {
+			const current = event.target.classList;
+			if (current.value === 'waiting') { //파랑화면
+				current.replace('waiting', 'ready');
+        $screen.textContent = '화면이 바뀌면 누르세요';
+
+        timeId = setTimeout(() => {
+          current.replace('ready', 'now');
+          $screen.textContent = '누르세요!!!!!!!!';
+          startTime = new Date();
+        }, Math.floor((Math.random() * 4000) + 2000))
+			} else if (current.value === 'ready') { //빨강 화면
+				current.replace('ready', 'waiting');
+        $screen.textContent = '너무 성급했습니다';
+        clearTimeout(timeId);
+			} else if (current.value === 'now') { //초록 화면
+				current.replace('now', 'waiting');
+        $screen.textContent = '클릭해서 시작하세요';
+
+        $result.textContent = '';
+        endTime = new Date();
+        const diff = (endTime - startTime) / 1000;
+        records.push(diff);
+        records.sort((a, b) => a - b);
+        const topFive = records.slice(0, 5);
+        const average = records.reduce((a, c, i) => a + c) / records.length;
+        $result.append(`현재 : ${diff}초, 평균 : ${average}초`, document.createElement('br'));
+        topFive.forEach((v, i) => {
+          $result.append(`${i + 1}등 : ${v}초`, document.createElement('br'));
+        })
+        
+			}
+		}
+	</script>
+</body>
+
+</html>

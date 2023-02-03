@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>끝말잇기</title>
+</head>
+
+<body>
+	<div><span id="order">1</span>번째 참가자</div>
+	<div>제시어: <span id="word"></span></div>
+	<input type="text">
+	<button>입력</button>
+	<script>
+		const player = Number(prompt('참가 인원을 입력하세요'));
+		const $order = document.querySelector('#order');
+		const $word = document.querySelector('#word');
+		const $input = document.querySelector('input');
+		const $button = document.querySelector('button');
+
+		let word = '';
+    let order = 1;
+		$button.addEventListener('click', buttonEvent);
+
+		function buttonEvent() {
+      
+			if ((!word || word[word.length - 1] === $input.value[0]) && relayCondition()) {
+				//글자 조건
+				word = $input.value;
+				$word.textContent = word;
+        nextUser();
+			}
+      $input.value = '';
+      $input.focus();
+		}
+
+		function relayCondition() {//끝말잇기 조건
+      if(!$input.value) {
+        alert('입력창이 비었습니다.')
+      } else if ($input.value.length !== 3){
+        alert('3글자를 입력하시오');
+      } else {
+        return true;
+      }
+		}
+
+    function nextUser() {
+      if (order === player) {
+        order = 1;
+      } else {
+        order += 1;
+      }
+      $order.textContent = order;
+    }
+	</script>
+</body>
+
+</html>

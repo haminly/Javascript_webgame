@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>계산기</title>
+  <style>
+    * {
+      box-sizing: border-box
+    }
+
+    #result {
+      width: 180px;
+      height: 50px;
+      margin: 5px;
+      text-align: right
+    }
+
+    #operator {
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+      text-align: center
+    }
+
+    button {
+      width: 50px;
+      height: 50px;
+      margin: 5px
+    }
+  </style>
+</head>
+
+<!--계산기버튼구현-->
+
+<body>
+  <input readonly id="operator">
+  <input readonly type="number" id="result">
+  <div class="row">
+    <button id="num-7">7</button>
+    <button id="num-8">8</button>
+    <button id="num-9">9</button>
+    <button id="plus">+</button>
+  </div>
+  <div class="row">
+    <button id="num-4">4</button>
+    <button id="num-5">5</button>
+    <button id="num-6">6</button>
+    <button id="minus">-</button>
+  </div>
+  <div class="row">
+    <button id="num-1">1</button>
+    <button id="num-2">2</button>
+    <button id="num-3">3</button>
+    <button id="divide">/</button>
+  </div>
+  <div class="row">
+    <button id="clear">C</button>
+    <button id="num-0">0</button>
+    <button id="calculate">=</button>
+    <button id="multiply">x</button>
+  </div>
+  <script>
+    $result = document.querySelector('#result');
+    $operator = document.querySelector('#operator');
+    $clear = document.querySelector('#clear');
+    $calculate = document.querySelector('#calculate');
+    $plus = document.querySelector('#plus');
+    $minus = document.querySelector('#minus');
+    $divide = document.querySelector('#divide');
+    $multiply = document.querySelector('#multiply');
+
+    let result;
+    let operator = '';
+    let num_1 = '';
+    let num_2 = '';
+
+    for (let i = 0; i < 10; i++) {
+      document.querySelector(`#num-${i}`).addEventListener('click', clickNumber);
+    }
+    $plus.addEventListener('click', clickOperator);
+    $minus.addEventListener('click', clickOperator);
+    $multiply.addEventListener('click', clickOperator);
+    $divide.addEventListener('click', clickOperator);
+    $calculate.addEventListener('click', clickCalculate);
+    $clear.addEventListener('click', clickClear);
+
+    function clickNumber(event) {
+      if (operator) {
+        $result.value = '';
+        num_2 += event.target.textContent;
+        $result.value += event.target.textContent;
+        return ;
+      }
+      num_1 += event.target.textContent;
+      $result.value += event.target.textContent;
+    }
+    function clickOperator(event) {
+      if (!num_1) {
+        if (event.target.textContent === '-') {
+          num_1 = '0';
+          operator = '-';
+          $operator.value = '-';
+          return;
+        }
+        alert('숫자부터 입력하세요');
+        return;
+      }
+      if (num_2) {
+        clickCalculate();
+        num_1 = result;
+        num_2 = '';
+      }
+      operator = event.target.textContent;
+      $operator.value = event.target.textContent;
+    }
+    function clickCalculate(event) {
+      result = 0;
+      if (!num_2) {
+        alert('숫자를 입력하세요');
+        return;
+      }
+      if (operator === '+') {
+        console.log(`${num_1}, ${num_2}`);
+        result = parseFloat(num_1) + parseFloat(num_2);
+      } else if(operator === '-') {
+        result = parseFloat(num_1) - parseFloat(num_2);
+      } else if(operator === 'x') {
+        result = parseFloat(num_1) * parseFloat(num_2);
+      } else if(operator === '/') {
+        result = parseFloat(num_1) / parseFloat(num_2);
+      }
+      $result.value = result;
+    }
+    function clickClear() {
+      num_1 = '';
+      num_2 = '';
+      operator = '';
+      $operator.value = '';
+      $result.value = '';
+    }
+  </script>
+</body>

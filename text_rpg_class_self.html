@@ -1,0 +1,236 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>텍스트 RPG</title>
+</head>
+
+<body>
+  <form id="start-screen">
+    <input id="name-input" placeholder="주인공 이름을 입력하세요!" />
+    <button id="start">시작</button>
+  </form>
+  <div id="screen">
+    <div id="hero-stat">
+      <span id="hero-name"></span>
+      <span id="hero-level"></span>
+      <span id="hero-hp"></span>
+      <span id="hero-xp"></span>
+      <span id="hero-att"></span>
+    </div>
+    <form id="game-menu" style="display: none;">
+      <div id="menu-1">1.모험</div>
+      <div id="menu-2">2.휴식</div>
+      <div id="menu-3">3.종료</div>
+      <input id="menu-input" />
+      <button id="menu-button">입력</button>
+    </form>
+    <form id="battle-menu" style="display: none;">
+      <div id="battle-1">1.공격</div>
+      <div id="battle-2">2.회복</div>
+      <div id="battle-3">3.도망</div>
+      <input id="battle-input" />
+      <button id="battle-button">입력</button>
+    </form>
+    <div id="message"></div>
+    <div id="monster-stat">
+      <span id="monster-name"></span>
+      <span id="monster-hp"></span>
+      <span id="monster-att"></span>
+    </div>
+  </div>
+  <script>
+    const $startScreen = document.querySelector('#start-screen');
+    const $gameMenu = document.querySelector('#game-menu');
+    const $battleMenu = document.querySelector('#battle-menu');
+    const $message = document.querySelector('#message');
+    const $heroName = document.querySelector('#hero-name');
+    const $heroLevel = document.querySelector('#hero-level');
+    const $heroHp = document.querySelector('#hero-hp');
+    const $heroXp = document.querySelector('#hero-xp');
+    const $heroAtt = document.querySelector('#hero-att');
+    const $monsterName = document.querySelector('#monster-name');
+    const $monsterHp = document.querySelector('#monster-hp');
+    const $monsterAtt = document.querySelector('#monster-att');
+
+
+
+    let game = null;
+    $startScreen.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const name = event.target['name-input'].value;
+      game = new Game(name);
+    })
+
+    class Game {
+      constructor(name) {
+        this.hero = null;
+        this.monster = null;
+        this.monsterList = [
+          { name: '슬라임', hp: 25, att: 10, xp: 300 },
+          { name: '스켈레톤', hp: 50, att: 15, xp: 600 },
+          { name: '마왕', hp: 150, att: 35, xp: 5000 },
+        ];
+        this.start(name);
+      }
+      start(name) {
+        this.changeScreen('game-menu');
+        this.hero = new Hero(this, name);
+        this.updateHeroStat();
+        $gameMenu.addEventListener('submit', this.onGameMenu);
+        $battleMenu.addEventListener('submit', this.onBattleMenu);
+      }
+      changeScreen(screen) {
+        if (screen === 'start-screen') {
+          $startScreen.style.display = 'block';
+          $gameMenu.style.display = 'none';
+          $battleMenu.style.display = 'none';
+        } else if (screen === 'game-menu') {
+          $startScreen.style.display = 'none';
+          $gameMenu.style.display = 'block';
+          $battleMenu.style.display = 'none';
+        } else if (screen === 'battle-menu') {
+          $startScreen.style.display = 'none';
+          $gameMenu.style.display = 'none';
+          $battleMenu.style.display = 'block';
+        }
+      }
+      onGameMenu = (event) => { //addEventListener함수안에 this는 addEventListener를 부를 태그가 된다. 하지만 화살표 함수의 this는 객체의 this다.
+        event.preventDefault();
+        const choose = event.target['menu-input'].value;
+        if (choose === '1') { //전투
+          this.changeScreen('battle-menu');
+          //몬스터 생성
+          const randomIndex = Math.floor(Math.random() * this.monsterList.length);
+          const randomMonster = this.monsterList[randomIndex];
+          this.monster = new Monster(this, randomMonster.name, randomMonster.hp, randomMonster.att, randomMonster.xp);
+          this.updateMonsterStat();
+          this.showMessage(`몬스터와 마주쳤다. ${this.monster.name}인 것 같다!`);
+        } else if (choose === '2') { //채력 풀피
+          this.hero.hp = this.hero.maxhp;
+          this.updateHeroStat();
+        } else if (choose === '3') { //나가기, 게임리셋
+          this.quit();
+        }
+      }
+      onBattleMenu = (event) => {
+        event.preventDefault();
+        const choose = event.target['battle-input'].value;
+        if (choose === '1') { //공격
+          const { hero, monster } = this;
+          hero.attack(monster);
+          monster.attack(hero); //hp가 줄어든다. 객체 참조가 잘되어있는모습
+          this.updateHeroStat();
+          this.updateMonsterStat();
+          console.log('battlemenu: ' + monster);
+          if (hero.hp <= 0) { //용사가 죽으면
+            this.showMessage('용사가 전사했습니다.')
+            this.quit();
+          } else if (monster.hp <= 0) { //몬스터가 죽으면
+            this.showMessage(`${monster.name}를 물리쳤다!. ${monster.xp}xp  YUMMY~🥰`)
+            hero.getXp(monster.xp);
+            // monster = null;   이건 게임 안 monster를 null로 바꿔주지 못하고 온배틀메뉴에서 120줄 monster만 null로 만듬
+            this.monster = null;
+            console.log('battlemenu(died): ' + monster);
+            this.updateHeroStat();
+            this.updateMonsterStat();
+            this.changeScreen('game-menu');
+          } else {
+            this.showMessage(`${hero.att} 데미지를 주고 ${monster.att} 데미지를 받았다`);
+          }
+        } else if (choose === '2') { //회복
+          this.hero.heal(this.monster);
+          this.updateHeroStat();
+        } else if (choose === '3') { //도망
+          this.monster = null;
+          this.updateMonsterStat();
+          this.changeScreen('game-menu');
+          this.showMessage('전략적 후퇴..!')
+        }
+      }
+      updateHeroStat() {
+        const { hero } = this;
+        if (hero === null) {
+          $heroName.textContent = '';
+          $heroLevel.textContent = '';
+          $heroHp.textContent = ``;
+          $heroXp.textContent = ``
+          $heroAtt.textContent = ``;
+          return;
+        }
+        $heroName.textContent = hero.name;
+        $heroLevel.textContent = hero.lev + '.lv ';
+        $heroHp.textContent = `HP : ${hero.hp}/${hero.maxhp} `;
+        $heroXp.textContent = `XP : ${hero.xp}/${(hero.lev * 25) + 300} `
+        $heroAtt.textContent = `att : ${hero.att}`;
+      }
+      updateMonsterStat() {
+        const { monster } = this;
+        console.log(monster);
+        if (monster === null) {
+          $monsterName.textContent = '';
+          $monsterHp.textContent = '';
+          $monsterAtt.textContent = '';
+          return;
+        }
+        $monsterName.textContent = monster.name;
+        $monsterHp.textContent = ` hp : ${monster.hp}/${monster.maxhp}`;
+        $monsterAtt.textContent = `att : ${monster.att}`;
+      }
+      showMessage(message) {
+        $message.textContent = message;
+      }
+      quit() {
+        this.changeScreen('start-screen');
+        this.hero = null;
+        this.monster = null;
+        this.updateHeroStat();
+        this.updateMonsterStat();
+        $gameMenu.removeEventListener('submit', this.onGameMenuInput);
+        $battleMenu.removeEventListener('submit', this.onBattleMenuInput);
+        this.changeScreen('start');
+        game = null;
+      }
+    }
+    class Unit {
+      constructor(game, name, hp, att, xp) {
+        this.game = game;
+        this.name = name;
+        this.maxhp = hp;
+        this.hp = hp;
+        this.att = att;
+        this.xp = xp;
+      }
+      attack(target) {
+        target.hp -= this.att;
+      }
+    }
+    class Hero extends Unit {
+      constructor(game, name) {
+        super(game, name, 100, 10, 0);
+        this.lev = 1;
+      }
+      getXp(xp) {
+        this.xp += xp;
+        while (this.xp >= 300 + this.lev * 25) {
+          this.xp -= (this.lev * 25 + 300)
+          this.lev += 1;
+          this.att += 5;
+          this.maxhp += 15;
+          this.hp = this.maxhp;
+        }
+      }
+      heal(target) {
+        this.game.showMessage('물약을 벌컥벌컥');
+        this.hp = this.hp + 20 ;
+        this.hp = this.hp > this.maxhp ? this.maxhp : this.hp;
+        this.hp -= target.att;
+      }
+    }
+    class Monster extends Unit {
+
+    }
+  </script>
+</body>
+
+</html>
